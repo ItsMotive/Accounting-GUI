@@ -1,7 +1,8 @@
 from datetime import datetime
 import tkinter as tk
-from tkinter import ttk
+from tkinter import ttk, filedialog
 import psycopg2
+import csv
 
 from const import (
     ADD_QUERY,
@@ -12,8 +13,12 @@ from const import (
     PORT,
     TABLE_QUERY,
     USERNAME,
+    ITEM_NAME_COL,
+    AMOUNT_COL,
+    MERCHANT_COL,
+    PURCHASE_DATE_COL,
+    PAYMENT_MTHD_COL
 )
-
 
 class SortingTreeview(ttk.Treeview):
     """
@@ -70,7 +75,7 @@ class SortingTreeview(ttk.Treeview):
             self.heading(column, command=lambda: self.sort_treeview(column, True))
         self.sort_column = column
 
-def DB_Connection():
+def DB_Connection() -> None:
     conn = psycopg2.connect(
         dbname=DATABASE_NAME,
         user=USERNAME,
@@ -78,8 +83,9 @@ def DB_Connection():
         host=HOST,
         port=PORT,
     )
+    return conn
 
-def display_table():
+def display_table() -> None:
     # Establish a connection to the PostgreSQL database
     conn = DB_Connection()
 
@@ -108,8 +114,7 @@ def display_table():
         cur.close()
         conn.close()
 
-
-def display_gui(rows, col_names):
+def display_gui(rows, col_names) -> None:
     # Close existing table window if it exists
     if hasattr(display_gui, "table_window") and display_gui.table_window.winfo_exists():
         display_gui.table_window.destroy()
@@ -134,16 +139,15 @@ def display_gui(rows, col_names):
     for row in rows:
         tree.insert("", "end", values=row)
 
-    tree.pack(expand=True, fill=tk.BOTH)
+    tree.grid(row=0, column=0, padx=10, pady=10)
 
     # Refresh Button
     refresh_button = ttk.Button(
         display_gui.table_window, text="Refresh", command=display_table
     )
-    refresh_button.pack(side="bottom", pady=10)
+    refresh_button.grid(row=1, column=0, padx=10, pady=10, sticky="ew")
 
-
-def add_payment():
+def add_payment() -> None:
     # Get values from entry fields
     payment_values = [
         item_name_entry.get(),
@@ -180,9 +184,8 @@ def add_payment():
         # Close the cursor and connection
         cur.close()
         conn.close()
-
-
-def open_delete_window():
+        
+def open_delete_window() -> None:
     global entry_pks, success_label, error_label  # Declare global variables
 
     # Create the main window for deleting items
@@ -210,8 +213,7 @@ def open_delete_window():
     error_label = ttk.Label(delete_window, foreground="red")
     error_label.grid(row=3, column=0, columnspan=2, sticky="ew", padx=10, pady=5)
 
-
-def delete_items():
+def delete_items() -> None:
     global success_label, error_label  # Access global labels
 
     selected_pks = entry_pks.get()
@@ -248,11 +250,66 @@ def delete_items():
         cur.close()
         conn.close()
 
+def add_csv_payment(item: str, amount: int, merchant:str, date: str, method: str) -> None:
+    # Get values from entry fields
+    payment_values = [
+        item, amount, merchant, date, method
+    ]
+
+    # Establish a connection to the PostgreSQL database
+    conn = DB_Connection()
+
+    # Create a cursor object to execute SQL queries
+    cur = conn.cursor()
+
+    try:
+        # Execute an SQL query to insert new payment data into the table
+        cur.execute(
+            ADD_QUERY,
+            payment_values,
+        )
+
+        # Commit the transaction
+        conn.commit()
+
+        # Display success message
+        success_label.config(text="Payment added successfully!")
+
+    except Exception as e:
+        # Display error message
+        success_label.config(text="Error: " + str(e))
+
+    finally:
+        # Close the cursor and connection
+        cur.close()
+        conn.close()
+        
+def import_csv() -> None:
+    file_path = filedialog.askopenfilename(filetypes=[("CSV files", "*.csv")])
+    
+    if file_path:
+        
+        # Opens File
+        with open(file_path, 'r') as file:
+            
+            # Sets up csv reader
+            reader = csv.reader(file)
+            
+            # Skips header
+            next(reader)
+            
+            try:
+                for entry in reader:
+                    add_csv_payment(
+                        entry[ITEM_NAME_COL], entry[AMOUNT_COL], entry[MERCHANT_COL], entry[PURCHASE_DATE_COL], entry[PAYMENT_MTHD_COL]
+                    )
+                        
+            except Exception as e:
+                print(e)
 
 # Create the main window
 root = tk.Tk()
 root.title("PostgreSQL Table Display and Payment Entry")
-
 
 # Configure rows and columns to expand and fill available space
 root.rowconfigure(0, weight=1)
@@ -311,12 +368,18 @@ delete_payments_button = ttk.Button(
 )
 delete_payments_button.grid(row=8, column=0, padx=10, pady=10)
 
+# Import From CSV button
+import_button = tk.Button(
+    root, text="Import From CSV", command=import_csv
+)
+import_button.grid(row=9, column=0, padx=10, pady=10)
+
 # Success/Error Message Label
 success_label = ttk.Label(root, foreground="green")
-success_label.grid(row=9, column=0, sticky="ew", padx=10, pady=10)
+success_label.grid(row=10, column=0, sticky="ew", padx=10, pady=10)
 
 error_label = ttk.Label(root, foreground="red")
-error_label.grid(row=10, column=0, sticky="ew", padx=10, pady=5)
+error_label.grid(row=11, column=0, sticky="ew", padx=10, pady=5)
 
 # Start the GUI event loop
 root.mainloop()
