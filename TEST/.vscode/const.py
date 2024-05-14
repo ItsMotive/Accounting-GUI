@@ -9,5 +9,11 @@ ADD_QUERY = """
 	        VALUES (%s, %s, %s, %s, %s);
         """
 DELETE_QUERY = """
-            DELETE FROM public."Test" WHERE pk IN %s;;
+            DELETE FROM public."Test" WHERE pk IN %s;
         """
+
+ITEM_NAME_COL = 0
+AMOUNT_COL = 1
+MERCHANT_COL = 2
+PURCHASE_DATE_COL = 3
+PAYMENT_MTHD_COL = 4
