@@ -1,6 +1,6 @@
 # Project Name
 
-Short description or tagline about your project.
+Expense Database
 
 ## Table of Contents
 
@@ -13,16 +13,18 @@ Short description or tagline about your project.
 
 ## About
 
-Briefly introduce your project. What does it do? Why is it useful?
+This is just a small personal project to learn more about Python while using Postgres as the database. I plan on updating the code as I learn more about Python.
 
 ## Features
 
 List the key features and functionalities of your project.
 
-- Feature 1
-- Feature 2
-- Feature 3
+- Add Expenses
+- Remove Expenses
+- View Expenses
+- Add Expenses via CSV file
+- Sort Expenses by any Column (pk, Item Name, Amount, Merchant, Date of Purchase, Payment Method)
 
 ## Installation
 
-Provide step-by-step instructions on how to install and set up your project. Include any prerequisites or dependencies.
+Just need to download the repository and run main.py
