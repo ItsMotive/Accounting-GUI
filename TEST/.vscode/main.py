@@ -70,9 +70,7 @@ class SortingTreeview(ttk.Treeview):
             self.heading(column, command=lambda: self.sort_treeview(column, True))
         self.sort_column = column
 
-
-def display_table():
-    # Establish a connection to the PostgreSQL database
+def DB_Connection():
     conn = psycopg2.connect(
         dbname=DATABASE_NAME,
         user=USERNAME,
@@ -80,6 +78,10 @@ def display_table():
         host=HOST,
         port=PORT,
     )
+
+def display_table():
+    # Establish a connection to the PostgreSQL database
+    conn = DB_Connection()
 
     # Create a cursor object to execute SQL queries
     cur = conn.cursor()
@@ -152,13 +154,7 @@ def add_payment():
     ]
 
     # Establish a connection to the PostgreSQL database
-    conn = psycopg2.connect(
-        dbname=DATABASE_NAME,
-        user=USERNAME,
-        password=PASSWORD,
-        host=HOST,
-        port=PORT,
-    )
+    conn = DB_Connection()
 
     # Create a cursor object to execute SQL queries
     cur = conn.cursor()
@@ -228,14 +224,8 @@ def delete_items():
     pk_list = [pk.strip() for pk in pk_list]
 
     # Establish a connection to the PostgreSQL database
-    conn = psycopg2.connect(
-        dbname=DATABASE_NAME,
-        user=USERNAME,
-        password=PASSWORD,
-        host=HOST,
-        port=PORT,
-    )
-
+    conn = DB_Connection()
+    
     # Create a cursor object to execute SQL queries
     cur = conn.cursor()
 
