@@ -27,4 +27,4 @@ List the key features and functionalities of your project.
 
 ## Installation
 
-Just need to download the repository and run main.py
+Just need to download the repository and run main.py. Also need to update const.py with your database credentials.
